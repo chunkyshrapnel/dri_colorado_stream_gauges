@@ -4,7 +4,7 @@ import dataretrieval.nwis as nwis
 import os
 
 # List of key USGS gages throughout the Upper CO River Basin
-site_list = ['393259107194801', # 'COLORADO R ABV ROARING FORK R AT GLENWOOD SPGS, CO',
+site_list = [#'393259107194801', # 'COLORADO R ABV ROARING FORK R AT GLENWOOD SPGS, CO',
              '09095500',        # 'COLORADO RIVER NEAR CAMEO, CO.',
              '09109000',        # 'TAYLOR RIVER BELOW TAYLOR PARK RESERVOIR, CO.',
              '383103106594200', # 'GUNNISON RIVER AT CNTY RD 32 BELOW GUNNISON, CO',
@@ -35,8 +35,7 @@ site_list = ['393259107194801', # 'COLORADO R ABV ROARING FORK R AT GLENWOOD SPG
              '09429490',        # COLORADO RIVER ABOVE IMPERIAL DAM, AZ-CA
              ]
 
-
-# specify the USGS site code for which we want data.
+# Start date for analyzing data 
 start_date = '1980-01-01'
 
 # If the directory 'DataBySite' does not exist, make it.
@@ -45,38 +44,45 @@ if not(os.path.isdir(path)):
     os.mkdir('DataBySite')
 os.chdir(path)
 
-dict = {'station_id': [], 'site_name': [], 'latitude': [], 'longitude': [], 'data_available': []}
-df = pd.DataFrame(data=dict)
-record = [None] * 5
+# Columns of metadata file
+dict_meta = {'station_id': [], 'site_name': [], 'latitude': [], 'longitude': [], 'data_available': []}
+df_meta = pd.DataFrame(data=dict_meta)
+record_meta = [None] * 5
 
+# Iterates through each site in site_list
 for i in range(len(site_list)):
-    print(i)
-    # get basic info about the site
-    df3 = nwis.get_record(sites=site_list[i], service='site')
-    df4 = nwis.get_record(sites=site_list[i], service='dv', start=start_date, parameterCd='00060')
-    record[0] = df3.loc[0, 'site_no']
-    record[1] = df3.loc[0, 'station_nm']
-    record[2] = df3.loc[0, 'dec_lat_va']
-    record[3] = df3.loc[0, 'dec_long_va']
-    if (df4.empty):
-        record[4] = 'NO'
+    
+    df_basic_info = nwis.get_record(sites=site_list[i], service='site')
+    df_series_data = nwis.get_record(sites=site_list[i], service='dv', start=start_date, parameterCd='00060')
+    
+    record_meta[0] = df_basic_info.loc[0, 'site_no']
+    record_meta[1] = df_basic_info.loc[0, 'station_nm']
+    record_meta[2] = df_basic_info.loc[0, 'dec_lat_va']
+    record_meta[3] = df_basic_info.loc[0, 'dec_long_va']
+    if (df_series_data.empty):
+        record_meta[4] = 'NO'
     else:
-        record[4] = 'YES'
-    df.loc[len(df.index)] = record
+        record_meta[4] = 'YES'
+    df_meta.loc[len(df_meta.index)] = record_meta
 
-    if not(df4.empty):
-        df4.drop(['site_no','00060_Mean_cd'], axis=1, inplace=True)
-        df4.rename({"00060_Mean": "discharge_cfs"}, axis=1, inplace=True)
-        df4.rename({"datetime": "datetime"}, axis=1, inplace=True)
-        df4 = df4.rename_axis('date').reset_index()
-        #df4['date'].str[0:8]
-        df4['date'] = df4['date'].apply(lambda x: str(x)[0:10])
-        df4['year'] = df4['date'].apply(lambda x: str(x)[0:4])
-        df4['month'] = df4['date'].apply(lambda x: str(x)[5:7])
-        df4['day'] = df4['date'].apply(lambda x: str(x)[8:11])
-        df4.to_csv(site_list[i] + '.csv')
+    if not(df_series_data.empty):
 
-df.to_csv('metadata.csv')
+        df_series_data.drop(['site_no','00060_Mean_cd'], axis=1, inplace=True)
+        df_series_data.rename({"00060_Mean": "discharge_cfs"}, axis=1, inplace=True)
+        df_series_data = df_series_data.rename_axis('date').reset_index()
+
+        df_series_data['date'] = df_series_data['date'].apply(lambda x: str(x)[0:10])
+        df_series_data['year'] = df_series_data['date'].apply(lambda x: str(x)[0:4])
+        df_series_data['month'] = df_series_data['date'].apply(lambda x: str(x)[5:7])
+        df_series_data['day'] = df_series_data['date'].apply(lambda x: str(x)[8:11])
+        df_series_data.to_csv(site_list[i] + '_daily.csv')
+
+        # Aggregate daily series data to monthly
+        df_series_data['date'] = df_series_data['date'].apply(lambda x: str(x)[0:7])
+        df_monthly = df_series_data.groupby(['date', 'year', 'month']).agg({'discharge_cfs': ['min', 'max', 'mean']})
+        df_monthly.to_csv(site_list[i] + '_monthly_summary.csv')
+
+df_meta.to_csv('metadata.csv')
 
 
 
