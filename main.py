@@ -50,7 +50,8 @@ df_meta = pd.DataFrame(data=dict_meta)
 record_meta = [None] * 5
 
 # Iterates through each site in site_list
-for i in range(len(site_list)):
+#for i in range(len(site_list)):
+for i in range(1):
     
     df_basic_info = nwis.get_record(sites=site_list[i], service='site')
     df_series_data = nwis.get_record(sites=site_list[i], service='dv', start=start_date, parameterCd='00060')
@@ -75,7 +76,7 @@ for i in range(len(site_list)):
         df_series_data['year'] = df_series_data['date'].apply(lambda x: str(x)[0:4])
         df_series_data['month'] = df_series_data['date'].apply(lambda x: str(x)[5:7])
         df_series_data['day'] = df_series_data['date'].apply(lambda x: str(x)[8:11])
-        df_series_data.to_csv(site_list[i] + '_daily.csv')
+        df_series_data.to_csv(site_list[i] + '_daily.csv', columns=['date', 'year', 'month', 'day', 'discharge_cfs'])
 
         # Aggregate daily series data to monthly
         df_series_data['date'] = df_series_data['date'].apply(lambda x: str(x)[0:7])
