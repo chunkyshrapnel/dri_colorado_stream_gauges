@@ -80,6 +80,14 @@ for i in range(len(site_list)):
         # Aggregate daily series data to monthly
         df_series_data['date'] = df_series_data['date'].apply(lambda x: str(x)[0:7])
         df_monthly = df_series_data.groupby(['date', 'year', 'month']).agg({'discharge_cfs': ['min', 'max', 'mean']})
+
+        # This is for csv formatting
+        df_monthly.columns = df_monthly.columns.droplevel(0)
+        df_monthly.rename({'min': "min_cfs"}, axis=1, inplace=True)
+        df_monthly.rename({'max': "max_cfs"}, axis=1, inplace=True)
+        df_monthly.rename({'mean': "mean_cfs"}, axis=1, inplace=True)
+
+        print(df_monthly.head())
         df_monthly.to_csv(site_list[i] + '_monthly_summary.csv')
 
 df_meta.to_csv('metadata.csv')
