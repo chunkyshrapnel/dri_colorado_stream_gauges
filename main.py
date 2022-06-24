@@ -50,8 +50,7 @@ df_meta = pd.DataFrame(data=dict_meta)
 record_meta = [None] * 5
 
 # Iterates through each site in site_list
-#for i in range(len(site_list)):
-for i in range(1):
+for i in range(len(site_list)):
     
     df_basic_info = nwis.get_record(sites=site_list[i], service='site')
     df_series_data = nwis.get_record(sites=site_list[i], service='dv', start=start_date, parameterCd='00060')
