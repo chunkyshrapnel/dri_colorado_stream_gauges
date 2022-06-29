@@ -39,9 +39,9 @@ site_list = [#'393259107194801', # 'COLORADO R ABV ROARING FORK R AT GLENWOOD SP
 start_date = '1980-01-01'
 
 # If the directory 'DataBySite' does not exist, make it.
-path = os.getcwd() + '/DataBySite'
+path = os.getcwd() + '/Gage_Data'
 if not(os.path.isdir(path)):
-    os.mkdir('DataBySite')
+    os.mkdir('Gage_Data')
 os.chdir(path)
 
 # Columns of metadata file
@@ -87,7 +87,6 @@ for i in range(len(site_list)):
         df_monthly.rename({'max': "max_cfs"}, axis=1, inplace=True)
         df_monthly.rename({'mean': "mean_cfs"}, axis=1, inplace=True)
 
-        print(df_monthly.head())
         df_monthly.to_csv(site_list[i] + '_monthly_summary.csv')
 
 df_meta.to_csv('metadata.csv')
