@@ -87,6 +87,10 @@ for i in range(len(site_list)):
         df_monthly.rename({'max': "max_cfs"}, axis=1, inplace=True)
         df_monthly.rename({'mean': "mean_cfs"}, axis=1, inplace=True)
 
+        # There's a bug where the 6 columns are split up into a multi-indexed axis.
+        # You can see the bug by calling print(df_monthly) here.
+        # This formatting error is automatically fixed when df is exported to the csv.
+        # However, this can cause problems in the future if this code needs to be built upon.
         df_monthly.to_csv(site_list[i] + '_monthly_summary.csv')
 
 df_meta.to_csv('metadata.csv')
