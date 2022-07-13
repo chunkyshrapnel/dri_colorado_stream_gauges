@@ -79,13 +79,17 @@ for i in range(len(site_list)):
 
         # Aggregate daily series data to monthly
         df_series_data['date'] = df_series_data['date'].apply(lambda x: str(x)[0:7])
-        df_monthly = df_series_data.groupby(['date', 'year', 'month']).agg({'discharge_cfs': ['min', 'max', 'mean']})
+        df_monthly = df_series_data.groupby(['date', 'year', 'month']).\
+            agg({'discharge_cfs': ['min', 'max', 'mean', 'median']})
+        df_monthly['Q25'] = df_series_data.groupby(['date', 'year', 'month'])\
+            ["discharge_cfs"].quantile(.25)
 
         # This is for csv formatting
         df_monthly.columns = df_monthly.columns.droplevel(0)
         df_monthly.rename({'min': "min_cfs"}, axis=1, inplace=True)
         df_monthly.rename({'max': "max_cfs"}, axis=1, inplace=True)
         df_monthly.rename({'mean': "mean_cfs"}, axis=1, inplace=True)
+        df_monthly.rename({'': "Q25"}, axis=1, inplace=True)
 
         # There's a bug where the 6 columns are split up into a multi-indexed axis.
         # You can see the bug by calling print(df_monthly) here.
