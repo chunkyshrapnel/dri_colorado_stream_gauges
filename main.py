@@ -89,7 +89,8 @@ for i in range(len(site_list)):
         df_monthly.rename({'min': "min_cfs"}, axis=1, inplace=True)
         df_monthly.rename({'max': "max_cfs"}, axis=1, inplace=True)
         df_monthly.rename({'mean': "mean_cfs"}, axis=1, inplace=True)
-        df_monthly.rename({'': "Q25"}, axis=1, inplace=True)
+        df_monthly.rename({'median': "median_cfs"}, axis=1, inplace=True)
+        df_monthly.rename({'': "Q25_cfs"}, axis=1, inplace=True)
 
         # There's a bug where the 6 columns are split up into a multi-indexed axis.
         # You can see the bug by calling print(df_monthly) here.
